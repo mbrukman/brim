@@ -10,18 +10,20 @@ import * as cmd from "../stdlib/cmd"
 import electronIsDev from "../electron/isDev"
 
 // Paths for the zqd and zeek programs.
-const zqdPath = join(app.getAppPath(), "zdeps")
-const zqdZeekPath = join(zqdPath, "zeek")
+const zdepsPath = join(app.getAppPath(), "zdeps")
 
 const platformDefs = {
   darwin: {
-    zqdBin: "zqd"
+    zqdBin: "zqd",
+    zeekPath: join(zdepsPath, "zeek")
   },
   linux: {
-    zqdBin: "zqd"
+    zqdBin: "zqd",
+    zeekPath: join(zdepsPath, "zeek")
   },
   win32: {
-    zqdBin: "zqd.exe"
+    zqdBin: "zqd.exe",
+    zeekPath: join(zdepsPath, "zeek", "bin")
   }
 }
 
@@ -62,7 +64,7 @@ function zqdCommand(): string {
     return plat.zqdBin
   }
 
-  const zqdBin = resolve(join(zqdPath, plat.zqdBin))
+  const zqdBin = resolve(join(zdepsPath, plat.zqdBin))
   if (!pathExistsSync(zqdBin)) {
     throw new Error("zqd binary not present at " + zqdBin)
   }
@@ -85,7 +87,7 @@ export class ZQD {
     const sep = process.platform == "win32" ? ";" : ":"
     const pathKey = process.platform == "win32" ? "Path" : "PATH"
     const zqdEnvironment = _merge({}, process.env)
-    zqdEnvironment[pathKey] = [zqdPath, zqdZeekPath, process.env[pathKey]].join(
+    zqdEnvironment[pathKey] = [zdepsPath, platformDefs[process.platform].zeekPath, process.env[pathKey]].join(
       sep
     )
 
